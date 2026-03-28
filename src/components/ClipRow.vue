@@ -78,6 +78,19 @@ const plannedOutputName = computed(() => {
   return `${base}_${codec}_${mb}MB.mp4`;
 });
 
+const isSettled = computed(() => ["done", "error", "cancelled"].includes(props.file.status));
+
+function resetForReencode() {
+  props.file.status = "idle";
+  props.file.pass = 1;
+  props.file.pct = 0;
+  props.file.pctMonotonic = 0;
+  props.file.jobId = null;
+  props.file.outputPath = "";
+  props.file.outputBytes = null;
+  props.file.error = "";
+}
+
 
 // ----- estimate debounce & stale-response guard -----
 const estimating = ref(false);
@@ -176,6 +189,10 @@ watch(
     (props.file.audioSelected || []).slice().sort().join(","),
   ],
   () => {
+    if (!isRunning.value && isSettled.value) {
+      resetForReencode();
+    }
+
     if (clipInputError.value) {
       props.file.estimateMb = null;
       props.file.estimateRisk = "error";
@@ -549,7 +566,7 @@ const finalSizeIcon = computed(() => {
       status={{ file.status }} pct={{ file.pct }} mono={{ file.pctMonotonic }} pass={{ file.pass }} 
     </div> -->
     <div v-if="file.status === 'encoding' || file.status === 'queued' || file.status === 'done'" class="mt-4 relative">
-      <div class="absolute inset-0 flex text-lg right-0 items-center justify-end -top-20">
+      <div class="pointer-events-none absolute inset-0 flex text-lg right-0 items-center justify-end -top-20">
           
         </div>
       <div class="relative overflow-hidden h-8 rounded-lg border border-white/10 bg-ink-950/45">
