@@ -22,14 +22,14 @@ It uses:
 - Windows
 - `ffmpeg` and `ffprobe`
 
-By default, the app expects:
+For development, the app expects:
 
 ```text
 C:\ffmpeg\bin\ffmpeg.exe
 C:\ffmpeg\bin\ffprobe.exe
 ```
 
-Those paths are configured in [electron/config.cjs](./electron/config.cjs).
+Those paths are configured in [electron/config.cjs](./electron/config.cjs). In packaged releases, the app can also resolve bundled binaries from `resources/bin`.
 
 ## Install
 
@@ -59,44 +59,74 @@ Then launch Electron against the built app:
 npm run electron
 ```
 
-## Package A Portable Windows Build
+## Packaging And Releases
+
+The project now has two packaging paths:
+
+- `npm run package` for a local portable build
+- `npm run release` for a version-bumped release build
+
+Both flows build the frontend first, then run `electron-builder` with the shared config in [scripts/electron-builder.cjs](./scripts/electron-builder.cjs).
+
+### Local Package
 
 ```bash
 npm run package
 ```
 
-This currently creates a Windows portable build via `electron-builder`.
+This creates a Windows portable `.exe` in `release/` for local testing.
 
-## Important Packaging Note
+Behavior:
 
-Packaging is set up, but the app is not fully self-contained yet.
+- uses the current `package.json` version
+- names the artifact like `ClipperV<major>.<minor>.exe`
+- does not bundle `ffmpeg` or `ffprobe`
+- expects local binaries to still exist at `C:\ffmpeg\bin\...`
 
-Right now, the packaged app still depends on:
-- `C:\ffmpeg\bin\ffmpeg.exe`
-- `C:\ffmpeg\bin\ffprobe.exe`
+### Release Build
 
-So on another machine, the app will only work if those binaries exist at the same paths. A better next step would be bundling `ffmpeg` and `ffprobe` with the app and resolving them relative to the packaged application.
+```bash
+npm run release
+```
+
+This is the release pipeline for Windows portable builds.
+
+Behavior:
+
+- bumps the app version by incrementing the minor version in `package.json` and `package-lock.json`
+- builds the frontend
+- creates a portable Windows `.exe`
+- bundles `ffmpeg.exe` and `ffprobe.exe` into the app under `resources/bin`
+- names the artifact like `ClipperV<major>.<minor>-ffmpeg.exe`
+
+Because the release script edits version files, you should commit those changes after running it if you want the version bump tracked in Git.
+
+### Release Output Cleanup
+
+After packaging, [scripts/cleanup-release.cjs](./scripts/cleanup-release.cjs) removes intermediate builder output and keeps the final `.exe` in `release/`.
 
 ## Project Scripts
 
 - `npm run dev` - start Vite and Electron in development mode
 - `npm run build` - build the frontend into `dist`
 - `npm run electron` - run Electron using the built frontend
-- `npm run package` - build and package a portable Windows app
+- `npm run package` - create a local portable Windows build without bundled `ffmpeg`
+- `npm run release` - bump the minor version and create a release portable Windows build with bundled `ffmpeg`
 
 ## Project Structure
 
 ```text
 electron/   Electron main process, IPC, ffmpeg services
+scripts/    Packaging and release helpers
 src/        Vue UI
 dist/       Production frontend build output
+release/    Final packaged .exe output
 ```
 
 ## Current Status
 
-The app is functional for local use and basic packaging, but there are still a few rough edges you may want to improve:
+The app is functional for local use, packaging, and portable Windows releases. A few good next improvements would still be:
 
-- bundle `ffmpeg` / `ffprobe` with the app
 - clean up TypeScript declaration files
-- add a proper release pipeline
+- add code signing for Windows builds
 - add screenshots or usage examples to this README

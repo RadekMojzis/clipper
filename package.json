@@ -4,7 +4,7 @@
   "description": "Desktop video clipper and size-targeted encoder built with Electron and Vue.",
   "author": "Radek Mojzis",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
