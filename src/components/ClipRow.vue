@@ -166,8 +166,10 @@ watch(
     props.file.targetMb,
     props.file.fpsCap,
     props.file.scale,
-    props.file.startText,
-    props.file.endText,
+    props.file.startSeconds,
+    props.file.endSeconds,
+    props.file.startError,
+    props.file.endError,
     props.file.audioMode,
     props.file.audioKbps,
     props.file.codec,
@@ -566,7 +568,7 @@ const finalSizeIcon = computed(() => {
         <div v-if="file.status !== 'done'" class="absolute inset-0 flex items-center justify-center text-lg font-extrabold text-white text-shadow-lg/100">
           {{ progressPct }}% 
           <span v-if="file.status === 'encoding'" class="ms-1">
-            ({{ file.pass || 1 }}/2)
+            (pass {{ file.pass || 1 }}/2)
           </span>
         </div>
         <div v-else class="absolute inset-0 flex items-center justify-center text-lg font-extrabold text-white text-shadow-lg/100">

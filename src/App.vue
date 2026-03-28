@@ -5,6 +5,8 @@ import DropRow from "./components/DropRow.vue";
 
 const files = ref([]);
 const outputDir = ref("");
+const isWindowDragOver = ref(false);
+let windowDragDepth = 0;
 
 function addFiles(dropped) {
   for (const f of dropped) {
@@ -56,6 +58,57 @@ function addFiles(dropped) {
   }
 }
 
+function isFileDrag(event) {
+  const types = event?.dataTransfer?.types;
+  return Array.isArray(types)
+    ? types.includes("Files")
+    : typeof types?.contains === "function"
+      ? types.contains("Files")
+      : false;
+}
+
+function mapDroppedFiles(fileList) {
+  return Array.from(fileList || []).map((f) => ({
+    path: window.clipper.pathForFile(f),
+    name: f.name,
+    size: f.size,
+  }));
+}
+
+function clearWindowDragState() {
+  windowDragDepth = 0;
+  isWindowDragOver.value = false;
+}
+
+function onWindowDragEnter(event) {
+  if (!isFileDrag(event)) return;
+  event.preventDefault();
+  windowDragDepth += 1;
+  isWindowDragOver.value = true;
+}
+
+function onWindowDragOver(event) {
+  if (!isFileDrag(event)) return;
+  event.preventDefault();
+  isWindowDragOver.value = true;
+}
+
+function onWindowDragLeave(event) {
+  if (!isFileDrag(event)) return;
+  event.preventDefault();
+  windowDragDepth = Math.max(0, windowDragDepth - 1);
+  if (windowDragDepth === 0) {
+    isWindowDragOver.value = false;
+  }
+}
+
+function onWindowDrop(event) {
+  if (!isFileDrag(event)) return;
+  event.preventDefault();
+  clearWindowDragState();
+  addFiles(mapDroppedFiles(event.dataTransfer.files));
+}
+
 async function openOutputFolder() {
   try {
     await window.clipper.openOutputDir();
@@ -73,6 +126,11 @@ let offJobStatus = null;
 onMounted(async () => {
   const out = await window.clipper.getOutputDir();
   if (out?.ok) outputDir.value = out.dir;
+
+  window.addEventListener("dragenter", onWindowDragEnter);
+  window.addEventListener("dragover", onWindowDragOver);
+  window.addEventListener("dragleave", onWindowDragLeave);
+  window.addEventListener("drop", onWindowDrop);
 
   offJobStatus = window.clipper.onJobStatus((msg) => {
     if (!msg?.inputPath) return;
@@ -134,6 +192,10 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   offJobStatus?.();
+  window.removeEventListener("dragenter", onWindowDragEnter);
+  window.removeEventListener("dragover", onWindowDragOver);
+  window.removeEventListener("dragleave", onWindowDragLeave);
+  window.removeEventListener("drop", onWindowDrop);
 });
 </script>
 
@@ -165,7 +227,7 @@ onBeforeUnmount(() => {
     <main class="mx-auto max-w-6xl px-6 py-7">
       <div class="space-y-4">
         <ClipRow v-for="f in files" :key="f.id" :file="f" @remove="removeFile" />
-        <DropRow @drop-files="addFiles" />
+        <DropRow :is-drag-over="isWindowDragOver" @drop-files="addFiles" />
       </div>
     </main>
   </div>

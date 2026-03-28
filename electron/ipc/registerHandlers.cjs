@@ -1,16 +1,66 @@
 // electron/ipc/registerHandlers.cjs
-const { shell, clipboard } = require("electron");
-const { getOutputDir, pickOutputPath } = require("../services/paths.cjs");
-const { encodeOne } = require("../services/encode.cjs");
-const { estimateSizeFirst } = require("../services/estimate.cjs");
+const { shell, clipboard, dialog } = require("electron");
+const { getOutputDir, pickOutputPath } = require("../Services/paths.cjs");
+const { encodeOne } = require("../Services/encode.cjs");
+const { estimateSizeFirst } = require("../Services/estimate.cjs");
 const path = require("path");
-const { buildCF_HDROP, buildPreferredDropEffectCopy } = require("../services/clipboardWin.cjs");
+const { buildCF_HDROP, buildPreferredDropEffectCopy } = require("../Services/clipboardWin.cjs");
 const { spawn } = require("child_process");
 const fs = require("fs");
 
 
 function registerHandlers({ ipcMain, app, runningJobs }) {
   ipcMain.handle("app:ping", async () => ({ ok: true, name: "clipper" }));
+
+  ipcMain.handle("paths:pickVideoFiles", async () => {
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: "Select videos",
+        properties: ["openFile", "multiSelections"],
+        filters: [
+          {
+            name: "Videos",
+            extensions: [
+              "mp4",
+              "mov",
+              "m4v",
+              "mkv",
+              "webm",
+              "avi",
+              "wmv",
+              "flv",
+              "mpeg",
+              "mpg",
+              "ts",
+              "m2ts",
+            ],
+          },
+          { name: "All Files", extensions: ["*"] },
+        ],
+      });
+
+      if (canceled || !filePaths?.length) {
+        return { ok: true, files: [] };
+      }
+
+      const files = filePaths.map((filePath) => {
+        let size = 0;
+        try {
+          size = fs.statSync(filePath).size;
+        } catch {}
+
+        return {
+          path: filePath,
+          name: path.basename(filePath),
+          size,
+        };
+      });
+
+      return { ok: true, files };
+    } catch (err) {
+      return { ok: false, error: String(err?.message || err) };
+    }
+  });
 
   ipcMain.handle("paths:openOutputDir", async () => {
     const dir = getOutputDir(app);

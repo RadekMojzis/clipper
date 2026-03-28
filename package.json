@@ -1,6 +1,8 @@
 {
   "name": "clipper",
   "productName": "Clipper",
+  "description": "Desktop video clipper and size-targeted encoder built with Electron and Vue.",
+  "author": "Radek Mojzis",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +12,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "electron": "electron electron/main.cjs",
-    "package": "npm run build && electron-builder --win portable"
+    "package": "node scripts/package-local.cjs",
+    "release": "node scripts/release.cjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -32,18 +35,5 @@
     "tailwindcss": "^4.1.18",
     "vite": "^7.2.4",
     "wait-on": "^9.0.3"
-  },
-  "build": {
-    "appId": "com.clipper.app",
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        "portable"
-      ]
-    }
   }
 }

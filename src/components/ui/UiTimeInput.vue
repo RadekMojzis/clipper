@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const props = defineProps({
   modelValue: { type: String, default: "" },
@@ -8,6 +8,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:modelValue", "update:seconds", "update:error"]);
+const localValue = ref(props.modelValue);
+const isFocused = ref(false);
 
 function parseTimeInput(value) {
   const raw = String(value ?? "").trim();
@@ -37,26 +39,66 @@ function parseTimeInput(value) {
   return { ok: true, value: hours * 3600 + minutes * 60 + seconds, error: "" };
 }
 
-const parsed = computed(() => parseTimeInput(props.modelValue));
+function commitValidation(value) {
+  const parsed = parseTimeInput(value);
+  emit("update:seconds", parsed.ok ? parsed.value : null);
+  emit("update:error", parsed.ok ? "" : parsed.error);
+}
 
 watch(
-  parsed,
+  () => props.modelValue,
   (next) => {
-    emit("update:seconds", next.ok ? next.value : null);
-    emit("update:error", next.ok ? "" : next.error);
-  },
-  { immediate: true }
+    if (!isFocused.value && next !== localValue.value) {
+      localValue.value = next;
+    }
+  }
 );
+
+function sanitizeValue(value) {
+  return String(value ?? "").replace(/[^\d:.]/g, "");
+}
+
+function onBeforeInput(event) {
+  if (!event.data) return;
+  if (/^[\d:.]+$/.test(event.data)) return;
+  event.preventDefault();
+}
+
+function onInput(event) {
+  const nextValue = sanitizeValue(event.target.value);
+  if (nextValue !== event.target.value) {
+    event.target.value = nextValue;
+  }
+  localValue.value = nextValue;
+  emit("update:modelValue", nextValue);
+}
+
+function onFocus() {
+  isFocused.value = true;
+  emit("update:error", "");
+}
+
+function onBlur() {
+  isFocused.value = false;
+  commitValidation(localValue.value);
+}
+
+onMounted(() => {
+  commitValidation(localValue.value);
+});
 </script>
 
 <template>
   <input
-    :value="modelValue"
+    :value="localValue"
     class="ui-input py-2 tabular-nums rounded-lg text-center"
     :class="widthClass"
     type="text"
     inputmode="decimal"
     :placeholder="placeholder"
-    @input="emit('update:modelValue', $event.target.value)"
+    @beforeinput="onBeforeInput"
+    @input="onInput"
+    @focus="onFocus"
+    @blur="onBlur"
   />
 </template>

@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("clipper", {
 
   // paths
   getOutputDir: () => ipcRenderer.invoke("paths:outputDir"),
+  pickVideoFiles: () => ipcRenderer.invoke("paths:pickVideoFiles"),
 
   // encoding
   enqueueJobs: (payload) => ipcRenderer.invoke("jobs:enqueue", payload),
