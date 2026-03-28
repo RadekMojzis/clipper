@@ -1,79 +1,94 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+:focus-visible {
+  outline: none;
 }
 
-.card {
-  padding: 2em;
-}
+@keyframes softPulse {
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(245, 158, 11, .0);
   }
-  a:hover {
-    color: #747bff;
+
+  50% {
+    box-shadow: 0 0 16px rgba(245, 158, 11, .35);
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+@layer components {
+  .btn-action {
+      @apply relative h-10 w-10 rounded-lg border transition hover:-translate-y-[1px] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0;
+    }
+
+  .btn-glow::before {
+    content: "";
+    @apply pointer-events-none absolute -inset-[2px] rounded-xl opacity-0 ring-2 blur-[1px] transition-opacity duration-200;
+  }
+
+  .btn-glow::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0 rounded-lg opacity-0 bg-gradient-to-b from-white/20 to-transparent transition-opacity duration-200;
+  }
+
+  .btn-glow:hover::before,
+  .btn-glow:hover::after {
+    opacity: 1;
+  }
+
+  .btn-green {
+    @apply border-green-500/30 bg-gradient-to-b from-green-500/35 to-green-700/20 hover:border-green-400/60 hover:from-green-500/50 hover:to-green-700/30 disabled:border-white/15 disabled:from-white/5 disabled:to-white/5 disabled:bg-none;
+  }
+
+  .btn-green::before {
+    @apply ring-green-400/35;
+  }
+
+  .btn-green:disabled::before {
+    @apply ring-white/10;
+  }
+
+  .btn-rose {
+    @apply border-rose-500/30 bg-gradient-to-b from-rose-500/25 to-rose-600/10 hover:border-rose-400/60 hover:from-rose-500/35 hover:to-rose-600/20;
+  }
+
+  .btn-rose::before {
+    @apply ring-rose-400/35;
+  }
+
+  .btn-amber {
+    @apply border-amber-500/30 bg-gradient-to-b from-amber-500/25 to-amber-600/10 hover:border-amber-400/60 hover:from-amber-500/35 hover:to-amber-600/20;
+  }
+
+  .btn-amber::before {
+    @apply ring-amber-400/35;
+  }
+
+  .ui-control {
+    @apply rounded-lg border px-4 py-2 text-base font-semibold shadow-sm transition border-white/15 bg-black/35 text-white hover:border-green-700 hover:bg-black/45 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-green-300/60 disabled:opacity-40 disabled:hover:border-white/15 disabled:hover:bg-black/35;
+  }
+
+  .ui-input {
+    @apply rounded-lg border px-2 py-1 text-base font-semibold shadow-sm transition border-white/15 bg-black/35 text-white hover:border-green-700 hover:bg-black/45 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-green-300/60 disabled:opacity-40 disabled:hover:border-white/15 disabled:hover:bg-black/35;
+  }
+
+  .ui-option {
+    @apply flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition border-white/10 bg-white/5 hover:border-green-700 hover:bg-white/7 focus-within:ring-2 focus-within:ring-green-700 focus-within:border-green-300/60;
+  }
+
+  .ui-check {
+    @apply h-5 w-5 accent-green-500;
   }
 }

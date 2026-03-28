@@ -1,0 +1,37 @@
+@layer components {
+  .btn-action {
+    @apply group relative h-10 w-10 rounded-lg border transition hover:-translate-y-[1px] active:translate-y-0;
+  }
+
+  .btn-glow::before {
+    content: "";
+    @apply pointer-events-none absolute -inset-2 rounded-xl opacity-0 ring-2 blur-[1px] transition-opacity duration-200;
+  }
+
+  .btn-glow::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0 rounded-lg opacity-0 bg-gradient-to-b from-white/20 to-transparent transition-opacity duration-200;
+  }
+
+  .btn-glow:hover::before,
+  .btn-glow:hover::after {
+    opacity: 1;
+  }
+
+  /* Variants */
+  .btn-green {
+    @apply border-green-500/30 bg-gradient-to-b from-green-500/35 to-green-700/20 hover:border-green-400/60 hover:from-green-500/50 hover:to-green-700/30;
+  }
+
+  .btn-green::before {
+    @apply ring-green-400/35;
+  }
+
+  .btn-rose {
+    @apply border-rose-500/30 bg-gradient-to-b from-rose-500/25 to-rose-600/10 hover:border-rose-400/60 hover:from-rose-500/35 hover:to-rose-600/20;
+  }
+
+  .btn-rose::before {
+    @apply ring-rose-400/35;
+  }
+}

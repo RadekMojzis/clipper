@@ -1,5 +1,10 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
+import { createApp } from "vue";
+import App from "./App.vue";
+import wheelStep from "./directives/wheelStep";
+import { FontAwesomeIcon } from "./fontawesome";
+import "./style.css";
 
-createApp(App).mount('#app')
+createApp(App)
+  .component("fa", FontAwesomeIcon)
+  .directive("wheel-step", wheelStep)
+  .mount("#app");
